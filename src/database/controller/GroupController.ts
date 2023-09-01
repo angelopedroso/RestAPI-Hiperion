@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { GroupModel } from '@/database/schemas'
-import { redis } from '@/server'
+import { redis } from '@/index'
 
 interface GroupBody {
   _id: string

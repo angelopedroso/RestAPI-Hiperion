@@ -1,4 +1,4 @@
-import { redis } from '@/server'
+import { redis } from '@/index'
 import { Request, Response } from 'express'
 import { ParticipantModel } from '../schemas'
 
