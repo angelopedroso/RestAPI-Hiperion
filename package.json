@@ -6,6 +6,7 @@
   "engines": {
     "node": "18"
   },
+  "type": "module",
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsup src/index.ts",
