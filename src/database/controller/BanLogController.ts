@@ -1,10 +1,14 @@
 import { Request, Response } from 'express'
-import { BanLogModel } from '@/database/schemas'
+import { prisma } from '@/index'
 
 class BanLogController {
   async find(_: Request, response: Response) {
     try {
-      const log = await BanLogModel.find()
+      const log = await prisma.banLog.findMany({
+        orderBy: {
+          date_time: 'desc',
+        },
+      })
 
       return response.json(log)
     } catch (error: Error | any) {
@@ -17,25 +21,12 @@ class BanLogController {
 
   async findLogsByGroup(_: Request, response: Response) {
     try {
-      const logs = await BanLogModel.aggregate([
-        {
-          $group: {
-            _id: {
-              chat_name: '$chat_name',
-            },
-            command_count: {
-              $sum: 1,
-            },
-          },
+      const logs = await prisma.banLog.groupBy({
+        by: ['chat_name'],
+        _count: {
+          chat_name: true,
         },
-        {
-          $project: {
-            _id: 0,
-            chat_name: '$_id.chat_name',
-            command_count: 1,
-          },
-        },
-      ])
+      })
 
       return response.json(logs)
     } catch (error: Error | any) {

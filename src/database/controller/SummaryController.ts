@@ -1,20 +1,19 @@
 import { Request, Response } from 'express'
-import { GroupModel, LogModel, ParticipantModel } from '@/database/schemas'
+import { prisma } from '@/index'
 
 class SummaryController {
   async find(_: Request, response: Response) {
     try {
-      const totalGroups = await GroupModel.count()
-
-      const totalBlacklist = await ParticipantModel.countDocuments({
-        group_black_list: {
-          $exists: true,
-          $not: { $size: 0 },
+      const totalGroups = await prisma.group.count()
+      const totalBlacklist = await prisma.participant.count({
+        where: {
+          group_black_list: {
+            some: {},
+          },
         },
       })
-
-      const totalParticipants = await ParticipantModel.countDocuments()
-      const totalLogs = await LogModel.countDocuments()
+      const totalParticipants = await prisma.participant.count()
+      const totalLogs = await prisma.log.count()
 
       const summary = {
         totalGroups,

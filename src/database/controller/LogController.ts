@@ -1,10 +1,14 @@
 import { Request, Response } from 'express'
-import { LogModel } from '@/database/schemas'
+import { prisma } from '@/index'
 
 class LogController {
   async find(_: Request, response: Response) {
     try {
-      const log = await LogModel.find()
+      const log = await prisma.log.findMany({
+        orderBy: {
+          date_time: 'desc',
+        },
+      })
 
       return response.json(log)
     } catch (error: Error | any) {
@@ -17,34 +21,17 @@ class LogController {
 
   async findLogsByGroup(_: Request, response: Response) {
     try {
-      const logs = await LogModel.aggregate([
-        {
-          $match: {
-            is_group: true,
-          },
+      const log = await prisma.log.groupBy({
+        by: ['groupId', 'chat_name'],
+        where: {
+          is_group: true,
         },
-        {
-          $group: {
-            _id: {
-              groupId: '$groupId',
-              chat_name: '$chat_name',
-            },
-            command_count: {
-              $sum: 1,
-            },
-          },
+        _count: {
+          command: true,
         },
-        {
-          $project: {
-            _id: 0,
-            groupId: '$_id.groupId',
-            chat_name: '$_id.chat_name',
-            command_count: 1,
-          },
-        },
-      ])
+      })
 
-      return response.json(logs)
+      return response.json(log)
     } catch (error: Error | any) {
       return response.status(500).json({
         error: 'Something wrong happened, try again!',

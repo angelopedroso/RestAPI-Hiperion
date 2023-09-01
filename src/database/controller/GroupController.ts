@@ -1,6 +1,5 @@
 import { Request, Response } from 'express'
-import { GroupModel } from '@/database/schemas'
-import { redis } from '@/index'
+import { prisma, redis } from '@/index'
 
 interface GroupBody {
   _id: string
@@ -24,11 +23,17 @@ class GroupController {
         return response.json(JSON.parse(cache))
       }
 
-      const group = await GroupModel.find()
+      const allGroups = await prisma.group.findMany({
+        include: {
+          participants: true,
+          black_list: true,
+          anti_trava: true,
+        },
+      })
 
-      await redis.set('all-groups', JSON.stringify(group), 'EX', 60 * 5)
+      await redis.set('all-groups', JSON.stringify(allGroups), 'EX', 60 * 5)
 
-      return response.json(group)
+      return response.json(allGroups)
     } catch (error: Error | any) {
       return response.status(500).json({
         error: 'Something wrong happened, try again!',
@@ -47,7 +52,16 @@ class GroupController {
         return response.json(JSON.parse(cache))
       }
 
-      const group = await GroupModel.findById(id)
+      const group = await prisma.group.findUnique({
+        where: {
+          id,
+        },
+        include: {
+          participants: true,
+          black_list: true,
+          anti_trava: true,
+        },
+      })
 
       await redis.set(`group:${id}`, JSON.stringify(group), 'EX', 60 * 5)
 

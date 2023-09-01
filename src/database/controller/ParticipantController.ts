@@ -1,15 +1,19 @@
-import { redis } from '@/index'
+import { prisma, redis } from '@/index'
 import { Request, Response } from 'express'
-import { ParticipantModel } from '../schemas'
 
 class ParticipantController {
   async find(_: Request, response: Response) {
     try {
       const [allUsers, totalUsers] = await Promise.all([
-        ParticipantModel.find()
-          .populate('participant_group_type')
-          .sort({ name: 'asc' }),
-        ParticipantModel.countDocuments(),
+        prisma.participant.findMany({
+          include: {
+            participant_group_type: true,
+          },
+          orderBy: {
+            name: 'asc',
+          },
+        }),
+        prisma.participant.count(),
       ])
 
       const formattedUsers = allUsers.map((user) => {
@@ -44,11 +48,36 @@ class ParticipantController {
         return response.json(JSON.parse(cache))
       }
 
-      const participants = await ParticipantModel.find()
+      const participantsAdmin = await prisma.participant.findMany({
+        where: {
+          participant_group_type: {
+            some: {
+              tipo: 'admin',
+            },
+          },
+        },
+        include: {
+          group_participant: true,
+        },
+      })
 
-      await redis.set('all-admins', JSON.stringify(participants), 'EX', 60 * 10)
+      const formattedData = participantsAdmin.map((user) => {
+        return {
+          ...user,
+          group_participant: user.group_participant.map((group) => {
+            return { name: group.name, image_url: group.image_url }
+          }),
+        }
+      })
 
-      return response.json(participants)
+      await redis.set(
+        'all-admins',
+        JSON.stringify(formattedData),
+        'EX',
+        60 * 10,
+      )
+
+      return response.json(formattedData)
     } catch (error: Error | any) {
       return response.status(500).json({
         error: 'Something wrong happened, try again!',

@@ -1,10 +1,10 @@
 import { Request, Response } from 'express'
-import { BotSettingsModel } from '@/database/schemas'
+import { prisma } from '@/index'
 
 class BotSettings {
   async find(_: Request, response: Response) {
     try {
-      const bot = await BotSettingsModel.find()
+      const bot = await prisma.botSettings.findFirst({})
 
       return response.json(bot)
     } catch (error: Error | any) {
@@ -19,13 +19,22 @@ class BotSettings {
     try {
       const { id, private: privateChat } = request.body
 
-      const bot = await BotSettingsModel.findByIdAndUpdate(
-        id,
-        { private: privateChat },
-        {
-          new: true,
+      const existsBot = await prisma.botSettings.findFirst({})
+
+      if (!existsBot) {
+        return response.status(400).json({
+          message: 'Bot not found!',
+        })
+      }
+
+      const bot = await prisma.botSettings.update({
+        where: {
+          id,
         },
-      )
+        data: {
+          private: privateChat,
+        },
+      })
 
       return response.json(bot)
     } catch (error: Error | any) {
