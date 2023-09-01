@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import {
+  banLogController,
   botSettings,
   groupController,
   logController,
@@ -21,6 +22,10 @@ routes.get('/users/admin', participantController.findAdmins)
 // Log
 routes.get('/log', logController.find)
 routes.get('/log/total-by-group', logController.findLogsByGroup)
+
+// BanLog
+routes.get('/ban', banLogController.find)
+routes.get('/ban/total-by-group', banLogController.findLogsByGroup)
 
 // Summary
 routes.get('/summary', summaryController.find)

@@ -1,5 +1,6 @@
 export * from './SummaryController'
 export * from './LogController'
+export * from './BanLogController'
 export * from './GroupController'
 export * from './BotSettings'
 export * from './ParticipantController'
