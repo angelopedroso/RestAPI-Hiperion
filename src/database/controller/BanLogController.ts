@@ -31,7 +31,6 @@ class BanLogController {
         {
           $project: {
             _id: 0,
-            groupId: '$_id.groupId',
             chat_name: '$_id.chat_name',
             command_count: 1,
           },

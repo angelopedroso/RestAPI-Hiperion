@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 
 const Banlog = new mongoose.Schema({
+  user_phone: String,
   user_name: String,
   chat_name: String,
   message: String,
