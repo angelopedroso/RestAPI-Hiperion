@@ -60,12 +60,6 @@ class GroupController {
     try {
       const { id } = request.params
 
-      const cache = await redis.get(`group:${id}`)
-
-      if (cache) {
-        return response.json(JSON.parse(cache))
-      }
-
       const group = await prisma.group.findUnique({
         where: {
           id,
@@ -76,8 +70,6 @@ class GroupController {
           anti_trava: true,
         },
       })
-
-      await redis.set(`group:${id}`, JSON.stringify(group), 'EX', 60 * 5)
 
       return response.json(group)
     } catch (error: Error | any) {
