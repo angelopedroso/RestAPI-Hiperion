@@ -57,16 +57,39 @@ class ParticipantController {
           },
         },
         include: {
-          group_participant: true,
+          group_participant: {
+            where: {
+              participant_group_type: {
+                some: {
+                  tipo: 'admin',
+                },
+              },
+            },
+            select: {
+              name: true,
+              image_url: true,
+              participant_group_type: true,
+            },
+          },
         },
       })
 
       const formattedData = participantsAdmin.map((user) => {
         return {
           ...user,
-          group_participant: user.group_participant.map((group) => {
-            return { name: group.name, image_url: group.image_url }
-          }),
+          group_participant: user.group_participant
+            .filter((group) => {
+              return group.participant_group_type.some(
+                (type) =>
+                  type.tipo === 'admin' && type.participantId === user.id,
+              )
+            })
+            .map((gp) => {
+              return {
+                name: gp.name,
+                image_url: gp.image_url,
+              }
+            }),
         }
       })
 
