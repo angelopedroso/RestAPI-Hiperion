@@ -22,6 +22,7 @@ interface GroupBody {
   auto_sticker: boolean
   anti_link: boolean
   anti_porn: boolean
+  anti_profane: boolean
   name: string
   image_url: string | null
   anti_trava: AntiTrava
@@ -88,8 +89,9 @@ class GroupController {
         anti_porn: antiPorn,
         auto_invite_link: autoInviteLink,
         auto_sticker: autoSticker,
+        anti_profane: antiProfane,
         bem_vindo: bemVindo,
-        black_list: blackList,
+        // black_list: blackList,
         anti_trava: antiTrava,
         one_group: oneGroup,
       }: GroupBody = request.body
@@ -114,6 +116,7 @@ class GroupController {
           bem_vindo: bemVindo,
           anti_link: antiLink,
           anti_porn: antiPorn,
+          anti_profane: antiProfane,
           one_group: oneGroup,
           auto_sticker: autoSticker,
           auto_invite_link: autoInviteLink,
